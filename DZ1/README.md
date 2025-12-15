@@ -21,39 +21,39 @@ Jenkins автоматично клонує його під час запуск�
 
 Успішно запустив .yml файл.
 
-![](/screenshots/Docker_Desktop_1.png)
+![](/DZ1/screenshots/Docker_Desktop_1.png)
 
 Підготував Jenkins до роботи
 
 У Tools додав maven-інсталятор, для його коректної роботи. 
 
-![](/screenshots/Maven_tools.png)
+![](/DZ1/screenshots/Maven_tools.png)
 
 Також встановив додатковий Plugin для Telegram сповіщень і настроїв його відповідно до інструкції, яку надав розробник.
 
 https://github.com/jenkinsci/telegram-notifications-plugin
 
-![](/screenshots/Bot_in_Jenkins.png)
+![](/DZ1/screenshots/Bot_in_Jenkins.png)
 
 Створив два Jobs у Jenkins
 
-![](/screenshots/Jobs_in_jenkins.png)
+![](/DZ1/screenshots/Jobs_in_jenkins.png)
 
 ### Simple Freestyle Job
 
 Підключив Git репозиторій до Job, через відповідну вкладку. Вставив туди посилання і замінив гілку на main.
 
-![](/screenshots/Git.png)
+![](/DZ1/screenshots/Git.png)
 
 У Build-Steps спершу використав maven, який я попередньо налаштував у Tools, а у додаткових налаштування вибрав розташування POM, бо у форкнутого репозиторія їх є 2. Я обрав Complete
 
-![](/screenshots/Maven_with_POM.png)
+![](/DZ1/screenshots/Maven_with_POM.png)
 
 Post-build Actions додав дію Archive the artifacts. І вказав шлях.
 
 Результат:
 
-![](/screenshots/Freestyle_res.png)
+![](/DZ1/screenshots/Freestyle_res.png)
 
 ### Simple Pipeline Job
 
@@ -95,9 +95,10 @@ Post-build Actions додав дію Archive the artifacts. І вказав шл
 
 Результат:
 
-![](/screenshots/Pipeline_res.png)
+![](/DZ1/screenshots/Pipeline_res.png)
 
 Сповіщення у телеграмі:
 
-![](/screenshots/Bot_in_telegtam.png)
+![](/DZ1/screenshots/Bot_in_telegtam.png)
+
 
