@@ -1,77 +1,139 @@
-Створення дистрибутиву. Було обрано Linux Ubuntu. 
-Після стандартної процедури встановлення, для завантаження Nginx було запущенно дані команди:
+
+# Встановлення та аналіз роботи веб-сервера Nginx
+
+## Вибір дистрибутиву
+
+Для виконання завдання було обрано дистрибутив **Linux Ubuntu**.  
+Після стандартної процедури встановлення операційної системи було виконано інсталяцію веб-сервера Nginx.
+
+---
+
+## Встановлення Nginx
+
+Для оновлення списку пакетів та встановлення Nginx було використано такі команди:
+
+```bash
 sudo apt update
 sudo apt install nginx
-Після встановлення, перевірив чи працює.
+````
+
+Після завершення інсталяції було перевірено стан сервісу:
+
+```bash
 systemctl status nginx
-І через браузер
-[скріншот]
+```
+![](/DZ3/src/VirtualBoxVM_8069vNVdWj.png)
 
-Командою 
+
+Також працездатність веб-сервера була перевірена через браузер шляхом відкриття сторінки `localhost`.
+
+![](/DZ3/src/VirtualBoxVM_E68EigTock.png)
+
+---
+
+## Аналіз процесів Nginx
+
+Для перевірки кількості процесів Nginx та їх PID була використана команда:
+
+```bash
 pidof nginx
-Було перевірено кількість процесів і їхні PID.
-З них один є Master, а решта Worker процеси.
-За допомогою команди 
+```
+
+Було виявлено, що Nginx складається з одного **Master process** та кількох **Worker process**.
+
+---
+
+## Аналіз файлових дескрипторів процесів
+
+Для перегляду відкритих файлових дескрипторів процесів було використано команду:
+
+```bash
 ls -l /proc/<PID>/fd
-Переглянув що у дескрипторах процесу
+```
 
-Master process:
-deo@deo-VirtualBox:/home$ sudo ls -l /proc/7412/fd
-total 0
-lrwx------ 1 root root 64 Jan  7 01:01 0 -> /dev/null
-lrwx------ 1 root root 64 Jan  7 01:01 1 -> /dev/null
-l-wx------ 1 root root 64 Jan  7 01:01 15 -> /var/log/nginx/error.log
-l-wx------ 1 root root 64 Jan  7 01:01 16 -> /var/log/nginx/access.log
-lrwx------ 1 root root 64 Jan  7 01:01 17 -> 'socket:[44056]'
-lrwx------ 1 root root 64 Jan  7 01:01 18 -> 'socket:[44057]'
-lrwx------ 1 root root 64 Jan  7 01:01 19 -> 'socket:[45068]'
-l-wx------ 1 root root 64 Jan  7 01:01 2 -> /var/log/nginx/error.log
-lrwx------ 1 root root 64 Jan  7 01:01 20 -> 'socket:[45069]'
-lrwx------ 1 root root 64 Jan  7 01:01 21 -> 'socket:[45070]'
-lrwx------ 1 root root 64 Jan  7 01:01 22 -> 'socket:[45071]'
-lrwx------ 1 root root 64 Jan  7 01:01 3 -> 'socket:[44054]'
-lrwx------ 1 root root 64 Jan  7 01:01 4 -> 'socket:[44055]'
-lrwx------ 1 root root 64 Jan  7 01:01 5 -> 'socket:[42426]'
-lrwx------ 1 root root 64 Jan  7 01:01 6 -> 'socket:[42427]'
+### Master process
 
+```bash
+sudo ls -l /proc/7412/fd
+```
 
-Worker process:
-deo@deo-VirtualBox:/home$ sudo ls -l /proc/7437/fd
-total 0
-lrwx------ 1 www-data www-data 64 Jan  7 00:53 0 -> /dev/null
-lrwx------ 1 www-data www-data 64 Jan  7 00:53 1 -> /dev/null
-l-wx------ 1 www-data www-data 64 Jan  7 00:53 15 -> /var/log/nginx/error.log
-l-wx------ 1 www-data www-data 64 Jan  7 00:53 16 -> /var/log/nginx/access.log
-lrwx------ 1 www-data www-data 64 Jan  7 00:53 17 -> 'socket:[44056]'
-lrwx------ 1 www-data www-data 64 Jan  7 00:53 19 -> 'socket:[45068]'
-l-wx------ 1 www-data www-data 64 Jan  7 00:53 2 -> /var/log/nginx/error.log
-lrwx------ 1 www-data www-data 64 Jan  7 00:53 22 -> 'socket:[45071]'
-lrwx------ 1 www-data www-data 64 Jan  7 00:53 23 -> 'anon_inode:[eventpoll]'
-lrwx------ 1 www-data www-data 64 Jan  7 00:53 24 -> 'anon_inode:[eventfd]'
-lrwx------ 1 www-data www-data 64 Jan  7 00:53 3 -> 'socket:[44054]'
-lrwx------ 1 www-data www-data 64 Jan  7 00:53 5 -> 'socket:[42426]'
-lrwx------ 1 www-data www-data 64 Jan  7 00:53 6 -> 'socket:[42427]'
+```text
+0  -> /dev/null
+1  -> /dev/null
+2  -> /var/log/nginx/error.log
+15 -> /var/log/nginx/error.log
+16 -> /var/log/nginx/access.log
+socket:[...]
+```
 
-Основна різниця це те, що Master - root і має більше сокетів.
+Master process працює від користувача **root** та має більшу кількість сокетів. Він відповідає за керування worker-процесами, відкриття мережевих портів та ініціалізацію логів.
 
-Логи зберігаються у два файли. Один, який зберігає усі дії виконанні на сайті, другий для зберігання помилок.
-Щоб прочитати логи можна використати команду
+---
+
+### Worker process
+
+```bash
+sudo ls -l /proc/7437/fd
+```
+
+```text
+0  -> /dev/null
+1  -> /dev/null
+2  -> /var/log/nginx/error.log
+15 -> /var/log/nginx/error.log
+16 -> /var/log/nginx/access.log
+socket:[...]
+anon_inode:[eventpoll]
+anon_inode:[eventfd]
+```
+
+Worker process працює від користувача **www-data** та безпосередньо обробляє HTTP-запити клієнтів.
+Він використовує сокети для мережевої взаємодії та механізми `epoll` для ефективної обробки подій.
+
+---
+
+## Робота з логами
+
+Nginx зберігає логи у двох основних файлах:
+
+**access.log** — містить інформацію про всі запити до веб-сервера
+
+**error.log** — містить повідомлення про помилки
+
+Для перегляду логів використовуються команди:
+
+```bash
 sudo cat /var/log/nginx/access.log
 sudo cat /var/log/nginx/error.log
+```
 
-або 
+Для перегляду логів у реальному часі:
+
+```bash
 tail -f /var/log/nginx/access.log
-Для Читання в реальному часі.
+```
 
-Ми можемо змінити конфігурацію веб-сервера, не перезавантажуючи його. Nginx керується ось цими командами
+![](/DZ3/src/VirtualBoxVM_SIHTUriEWF.png)
+
+---
+
+## Керування сервісом та оновлення конфігурації
+
+Керування веб-сервером Nginx здійснюється за допомогою таких команд:
+
+```bash
 sudo systemctl start nginx
 sudo systemctl stop nginx
 sudo systemctl restart nginx
 sudo systemctl reload nginx
-Команда restart зупиняє всі процеси і запускає знову
-Команда reload перезапускає сервіс без його зупинки.
-Тому змінити конфігурацію без перезвантаження серверу — потрібно використати команду  
+```
+
+`restart` — повністю зупиняє всі процеси та запускає їх знову
+
+`reload` — перечитує конфігурацію без повної зупинки сервісу
+
+Таким чином, конфігурацію веб-сервера можна змінювати **без перезавантаження сервера**, використовуючи команду:
+
+```bash
 sudo systemctl reload nginx
-
-
-
+```
